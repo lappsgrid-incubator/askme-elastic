@@ -1,6 +1,7 @@
 package org.lappsgrid.askme.elastic;
 
 
+import java.text.NumberFormat;
 import groovy.util.logging.Slf4j;
 import org.lappsgrid.askme.core.model.Document;
 import org.lappsgrid.askme.core.model.Section;
@@ -144,14 +145,15 @@ class ElasticDocumentList{
 				String tmp = new String(this.tv.get(1));
 				String sScore = new String(tmp.substring(0, tmp.length()-1));
 								
+				NumberFormat nf = NumberFormat.getInstance();
 				if(firstDoc) {
 					firstDoc = false;
-					doc.nscore = Float.parseFloat(sScore);
+					doc.nscore = nf.parse(sScore).floatValue();
 				}
 				else {
 					doclist.add(doc);
 					doc = new Document();
-					doc.nscore = Float.parseFloat(sScore);
+					doc.nscore = nf.parse(sScore).floatValue();
 				}
 			}
 			else if(this.tv.get(0).equals("source")) {
