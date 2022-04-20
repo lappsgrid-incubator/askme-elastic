@@ -16,6 +16,14 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.BasicCookieStore
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.ssl.SSLContextBuilder;
+import javax.net.ssl.SSLContext;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import groovy.util.logging.Slf4j
@@ -51,7 +59,9 @@ class GetElasticDocuments {
 		Configuration config = new Configuration();
 		this.elastic_host = config.ELASTICHOST;
 		this.elastic_port = config.ELASTICPORT;
-		this.elastic_address = new String("http://" + elastic_host + ":" + elastic_port + "/")
+        String elastic_user = "elastic";
+        String elastic_password = System.getenv("ELASTIC_PASSWORD");
+		this.elastic_address = new String("https://" + elastic_user + ":" + elastic_password + "@" + elastic_host + ":" + elastic_port + "/")
     }
 
     int changeCollection(String name) {
@@ -97,7 +107,16 @@ class GetElasticDocuments {
 		ElasticQueryResponse queryResponse = null;
 		
 		try {
-			HttpClient httpClient = HttpClientBuilder.create().build();
+            SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null,
+                    TrustSelfSignedStrategy.INSTANCE).build();
+            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
+                    sslContext, NoopHostnameVerifier.INSTANCE);
+
+            HttpClient httpClient = HttpClients.custom()
+                .setDefaultCookieStore(new BasicCookieStore())
+                .setSSLSocketFactory(sslSocketFactory)
+                .build();
+
 			HttpPost getRequest = new HttpPost(this.elastic_address + core + "/_search");
 		
 			logger.info("GetElasticDocuments.query() elastic address:  " + this.elastic_address + core + "/_search");
