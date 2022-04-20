@@ -45,7 +45,8 @@ class GetElasticDocuments {
     
 	static final String fields = new String ("\"fields\" : [ \"abstract\", \"authKeywords\", \"authors\", \"body\", \"content_url\", \"contents\", \"cover_date\", \"doi\", \"eissn\", \"endingPage\","  + 
 											"\"fetched\", \"file_urls\", \"filepath\", \"id\", \"issn\", \"issue\", \"metadata_update\", \"online_pubdate\", \"openaccess\", \"path\", \"pmid\", \"pmc\", \"preprint\"," + 
-											"\"priority\", \"publication_date\", \"publisher\", \"pubname\", \"sha1\", \"source\", \"startingPage\", \"tags\", \"time\", \"title\", \"url\", \"year\", \"vol\"] } } }");
+											"\"priority\", \"publication_date\", \"publisher\", \"pubname\", \"sha1\", \"source\", \"startingPage\", \"tags\", \"time\", \"title\", \"url\", \"year\", \"vol\"],");
+	static final String tiebreaker = new String ("\"tie_breaker\": 0.5 } } }");
 
 
     GetElasticDocuments() {
@@ -107,7 +108,7 @@ class GetElasticDocuments {
 
 		
 			//String queryline = new String( this.queryPrefix + "\"" + query.question + "\", " + this.fields);
-			String queryline = new String(this.limitPrefix + query.count + "," + queryPrefix + "\"" + query.question + "\", " + this.fields);
+			String queryline = new String(this.limitPrefix + query.count + "," + queryPrefix + "\"" + query.question + "\", " + this.fields + this.tiebreaker);
 			StringEntity requestEntity = new StringEntity(queryline, ContentType.APPLICATION_JSON);
 			logger.info("GetElasticDocuments.query() json query:  "+ queryline);
 			
