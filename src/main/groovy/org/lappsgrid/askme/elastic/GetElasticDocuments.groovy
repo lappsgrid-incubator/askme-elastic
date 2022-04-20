@@ -41,12 +41,8 @@ class GetElasticDocuments {
 	
 	static final String limitPrefix = new String ("{\"from\": 0, \"size\":");
 	static final String queryPrefix = new String ("\"query\": { \"multi_match\" : { \"query\" :");
-	//static final String fields = new String ("\"fields\" : [\"id\", \"pmid\", \"pmc\", \"doi\", \"year\", \"title\", \"path\", \"url\", \"abstract\", \"body\"] } } }");
-    
-	static final String fields = new String ("\"fields\" : [ \"abstract\", \"authKeywords\", \"authors\", \"body\", \"content_url\", \"contents\", \"cover_date\", \"doi\", \"eissn\", \"endingPage\","  + 
-											"\"fetched\", \"file_urls\", \"filepath\", \"id\", \"issn\", \"issue\", \"metadata_update\", \"online_pubdate\", \"openaccess\", \"path\", \"pmid\", \"pmc\", \"preprint\"," + 
-											"\"priority\", \"publication_date\", \"publisher\", \"pubname\", \"sha1\", \"source\", \"startingPage\", \"tags\", \"time\", \"title\", \"url\", \"year\", \"vol\"],");
 	static final String tiebreaker = new String ("\"tie_breaker\": 0.5 } } }");
+	static final String fields = new String ("\"fields\" : [ \"abstract\", \"contents\", \"title\", \"body\"] } } }");
 
 
     GetElasticDocuments() {
