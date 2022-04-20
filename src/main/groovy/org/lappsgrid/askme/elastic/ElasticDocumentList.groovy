@@ -65,7 +65,7 @@ class ElasticDocumentList{
 				doc.articleAbstract = nlp.process(articleAbstract);
 			}
 			else if(this.tv.get(0).equals("authKeywords")) {
-				doc.authKeywords = new String(this.tv.get(1));
+				doc.authKeyWords = new String(this.tv.get(1));
 			}
 			else if(this.tv.get(0).equals("authors")) {
 				doc.authors = new String(this.tv.get(1));
@@ -184,7 +184,7 @@ class ElasticDocumentList{
 			else if(this.tv.get(0).equals("year")) {
 				String year = new String(this.tv.get(1));
 				if(year.endsWith("}")){
-					year = year.subString(0,year.length()-1);
+					year = year.substring(0,year.length()-1);
 				}
 				doc.publication_date = year;
 			}
