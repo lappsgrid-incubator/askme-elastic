@@ -1,1 +1,6 @@
 *jar
+.DS_Store
+.idea
+/target
+src/main/docker/askme.ini
+src/main/docker/service.jar
