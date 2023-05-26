@@ -70,6 +70,10 @@ class ElasticDocumentList {
                 String body = new String(this.tv.get(1));
                 doc.body = nlp.process(body);
                 doc.articleAbstract = nlp.process(body);
+            } else if (this.tv.get(0).equals("text")) {
+                String body = new String(this.tv.get(1));
+                doc.body = nlp.process(body);
+                doc.articleAbstract = nlp.process(body);
             } else if (this.tv.get(0).equals("contents_url")) {
                 doc.contents_url = new String(this.tv.get(1));
             } else if (this.tv.get(0).equals("contents")) {
