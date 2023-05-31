@@ -30,18 +30,15 @@ class ElasticDocumentList {
         String delim = new String(":");
         boolean firstDoc = true, firstID = true;
 
-
         logger.info("ElasticDocumentList parseDocument invoked()");
-        logger.info("ElasticDocumentList parseDocument data is: " + data);
-
+        //logger.info("ElasticDocumentList parseDocument data is: " + data);
 
         nlp = new Stanford();
         this.fields = parser.parseLine(data);
         for (int i = 0; i < fields.size(); i++) {
 
             String field = (String) fields.get(i);
-            System.out.println("parsed field> " + field);
-
+            //System.out.println("parsed field> " + field);
 
             //trim off leading underscore character
             if (field.startsWith("_")) {
