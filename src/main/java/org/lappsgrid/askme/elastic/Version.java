@@ -1,4 +1,4 @@
-package org.lappsgrid.askme.solr;
+package org.lappsgrid.askme.elastic;
 
 /* DO NO EDIT. This file is geneated automatically by Maven. */
 /**
@@ -6,7 +6,7 @@ package org.lappsgrid.askme.solr;
  */
 public final class Version
 {
-	private static final String version = "1.1.0-SNAPSHOT";
+	private static final String version = "1.0.0";
 
 	public static String getVersion() { return version; }
 }
