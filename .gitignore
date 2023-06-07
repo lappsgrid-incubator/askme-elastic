@@ -4,3 +4,6 @@
 /target
 src/main/docker/askme.ini
 src/main/docker/service.jar
+
+VERSION
+Version.java
