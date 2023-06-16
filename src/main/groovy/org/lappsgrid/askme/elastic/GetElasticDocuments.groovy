@@ -38,12 +38,9 @@ import org.lappsgrid.askme.core.Configuration;
 @Slf4j("logger")
 class GetElasticDocuments {
 
-
     String elastic_address;
     String elastic_host;
     String elastic_port;
-
-
     String index;
 
     static final String limitPrefix = new String("{\"from\": 0, \"size\":");
@@ -55,20 +52,21 @@ class GetElasticDocuments {
 
 
     GetElasticDocuments() {
-        logger.info("Creating Elastic client")
 
+        logger.info("Creating Elastic client")
         Configuration config = new Configuration();
         this.elastic_host = config.ELASTICHOST;
         this.elastic_port = config.ELASTICPORT;
         this.elastic_address = new String("http://" + elastic_host + ":" + elastic_port + "/")
     }
 
+
     int changeCollection(String name) {
 
         this.index = new String(name);
-
         return nDocs
     }
+
 
     Packet answer(Packet packet, String id) {
 
@@ -91,7 +89,6 @@ class GetElasticDocuments {
 
         ElasticDocumentList documents = new ElasticDocumentList(response.getResults());
 
-
         logger.info("Received {} documents", documents.size())
         packet.documents = documents.getDocs();
         return packet
@@ -107,10 +104,11 @@ class GetElasticDocuments {
             HttpPost getRequest = new HttpPost(this.elastic_address + core + "/_search");
 
             logger.info("GetElasticDocuments.query() elastic address:  " + this.elastic_address + core + "/_search");
+            System.out.println(">>> GetElasticDocuments.query() elastic address:  " + this.elastic_address + core + "/_search");
             String queryline = new String(this.limitPrefix + query.count + "," + queryPrefix + "\"" + query.question + "\", " + this.fields + this.tiebreaker);
             StringEntity requestEntity = new StringEntity(queryline, ContentType.APPLICATION_JSON);
             logger.info("GetElasticDocuments.query() json query:  " + queryline);
-
+            System.out.println(">>> GetElasticDocuments.query() json query:  " + queryline);
 
             getRequest.setEntity(requestEntity);
 
@@ -119,9 +117,9 @@ class GetElasticDocuments {
             BufferedReader br = new BufferedReader(
                     new InputStreamReader((response.getEntity().getContent())));
 
-
             String output = new String();
             output = br.readLine();
+
             httpClient.getConnectionManager().shutdown();
 
             queryResponse = new ElasticQueryResponse(output);

@@ -27,10 +27,10 @@
 
     <logger name="org.lappsgrid" level="info"/>
     <logger name="org.lappsgrid.askme" level="info"/>
-    <logger name="org.lappsgrid.askme.elastic" level="trace"/>
+    <logger name="org.lappsgrid.askme.elastic" level="debug"/>
 
     <root level="warn">
-        <appender-ref ref="STDOUT" />
+        <appender-ref ref="STDOUT"/>
          <appender-ref ref="FILE"/>
     </root>
 </configuration>
