@@ -27,7 +27,7 @@ class Stanford {
 
     Section process(String text) {
         Section section = new Section()
-		if(text!=null) {
+		if (text != null) {
         	section.text = new String(text);
 		}
 		else {
@@ -42,7 +42,6 @@ class Stanford {
             return section
         }
 
-        // Process the sentences.
         // logger.trace("processing sentences")
         int id = 0;
         for (CoreSentence s : document.sentences()) {

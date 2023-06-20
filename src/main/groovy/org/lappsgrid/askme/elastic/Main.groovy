@@ -21,6 +21,11 @@ import org.lappsgrid.rabbitmq.topic.PostOffice
 import org.lappsgrid.serialization.Serializer
 
 /**
+ * Starts a thread that interacts with the post office, retrieves the message
+ * from the RabbitMQ post office, determines the action that is required and
+ * forwards the message that came in, but updates it, for example by adding
+ * documents that resulted from a database query.
+ *
  * TODO:
  * 1) Update imports to phase out eager (waiting on askme-core pom)
  * 2) Add exceptions / case statements to recv method?
@@ -132,9 +137,7 @@ class Main {
                     Packet packet = (Packet) message.body
 					logger.info("Index being searched is '{}'", packet.core)
                     logger.info("Gathering elastic documents for query '{}'", packet.query.query)
-                    //message.body = timer.recordCallable {
-                    process.answer(packet, id) //, nDocuments)
-                    //command}
+                    process.answer(packet, id)
                     logger.trace("Processed query from Message {}", id)
                     if (packet.documents && packet.documents.size() > 0) {
                         documentsFetched.increment(packet.documents.size())

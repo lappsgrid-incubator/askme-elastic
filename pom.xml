@@ -144,6 +144,11 @@
             <version>1.7.25</version>
         </dependency> -->
         <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-json</artifactId>
+            <version>3.0.9</version>
+        </dependency>
+        <dependency>
             <groupId>edu.stanford.nlp</groupId>
             <artifactId>stanford-corenlp</artifactId>
             <version>4.4.0</version>

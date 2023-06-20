@@ -35,6 +35,12 @@ import org.lappsgrid.askme.core.model.Section
 import org.lappsgrid.askme.core.Configuration;
 
 
+/**
+ * Interacts with the ElasticSearch database. It is handed a Packet from the message,
+ * prepares a post request to the ElasticSearch REST API, collects the data in an
+ * instance of ElasticDocumentList, and adds the documents from that list to the
+ * Packet.
+ */
 @Slf4j("logger")
 class GetElasticDocuments {
 
@@ -45,9 +51,10 @@ class GetElasticDocuments {
 
     static final String limitPrefix = new String("{\"from\": 0, \"size\":");
     static final String queryPrefix = new String("\"query\": { \"multi_match\" : { \"query\" :");
-    static final String fields = new String("\"fields\" : [ \"abstract\", \"authKeywords\", \"authors\", \"body\", \"content_url\", \"contents\", \"cover_date\", \"doi\", \"eissn\", \"endingPage\"," +
-            "\"fetched\", \"file_urls\", \"filepath\", \"id\", \"issn\", \"issue\", \"metadata_update\", \"online_pubdate\", \"openaccess\", \"path\", \"pmid\", \"pmc\", \"preprint\"," +
-            "\"priority\", \"publication_date\", \"publisher\", \"pubname\", \"sha1\", \"source\", \"startingPage\", \"tags\", \"text\", \"time\", \"title\", \"url\", \"year\", \"vol\"],");
+    //static final String fields = new String("\"fields\" : [ \"abstract\", \"authKeywords\", \"authors\", \"body\", \"content_url\", \"contents\", \"cover_date\", \"doi\", \"eissn\", \"endingPage\"," +
+    //        "\"fetched\", \"file_urls\", \"filepath\", \"id\", \"issn\", \"issue\", \"metadata_update\", \"online_pubdate\", \"openaccess\", \"path\", \"pmid\", \"pmc\", \"preprint\"," +
+    //        "\"priority\", \"publication_date\", \"publisher\", \"pubname\", \"sha1\", \"source\", \"startingPage\", \"tags\", \"text\", \"time\", \"title\", \"url\", \"year\", \"vol\"],");
+    static final String fields = new String("\"fields\" : [\"title\", \"abstract\", \"body\"],");
     static final String tiebreaker = new String("\"tie_breaker\": 0.5 } } }");
 
 
@@ -87,6 +94,7 @@ class GetElasticDocuments {
             return packet
         }
 
+        System.out.println('>>> Building ElasticDocumentList')
         ElasticDocumentList documents = new ElasticDocumentList(response.getResults());
 
         logger.info("Received {} documents", documents.size())
@@ -104,11 +112,11 @@ class GetElasticDocuments {
             HttpPost getRequest = new HttpPost(this.elastic_address + core + "/_search");
 
             logger.info("GetElasticDocuments.query() elastic address:  " + this.elastic_address + core + "/_search");
-            System.out.println(">>> GetElasticDocuments.query() elastic address:  " + this.elastic_address + core + "/_search");
+            System.out.println(">>> GetElasticDocuments.query() address : " + this.elastic_address + core + "/_search");
             String queryline = new String(this.limitPrefix + query.count + "," + queryPrefix + "\"" + query.question + "\", " + this.fields + this.tiebreaker);
             StringEntity requestEntity = new StringEntity(queryline, ContentType.APPLICATION_JSON);
-            logger.info("GetElasticDocuments.query() json query:  " + queryline);
-            System.out.println(">>> GetElasticDocuments.query() json query:  " + queryline);
+            logger.info("GetElasticDocuments.query() query:  " + queryline);
+            System.out.println(">>> GetElasticDocuments.query() query   : " + queryline);
 
             getRequest.setEntity(requestEntity);
 
@@ -129,6 +137,9 @@ class GetElasticDocuments {
 
             System.out.println("Exception:" + io.getStackTrace());
         }
+
+		logger.info("GetElasticDocuments.query(): returning response");
+        System.out.println(">>> GetElasticDocuments.query(): returning response");
 
         return (queryResponse);
     }
