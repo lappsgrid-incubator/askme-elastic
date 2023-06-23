@@ -18,12 +18,24 @@ import org.lappsgrid.serialization.lif.Annotation
 class Stanford {
 
     StanfordCoreNLP pipeline;
+    String mode;
 
-    Stanford() {
+    Stanford(String mode) {
+
+        this.mode = mode;
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma");
         pipeline = new StanfordCoreNLP(props);
+        if (mode == "full") {
+            props.setProperty("annotators", "tokenize,ssplit,pos,lemma");
+        } else if (mode == "simple"){
+            props.setProperty("annotators", "tokenize,ssplit");
+        } else {
+            pipeline = null
+        }
+        pipeline = new StanfordCoreNLP(props);
     }
+
 
     Section process(String text) {
         Section section = new Section()
@@ -56,8 +68,10 @@ class Stanford {
                 token.start = t.beginPosition()
                 token.end = t.endPosition()
                 token.word = t.word().toLowerCase()
-                token.lemma = t.lemma().toLowerCase()
-                token.pos = t.tag()
+                if (mode == "full"){
+                    token.lemma = t.lemma().toLowerCase()
+                    token.pos = t.tag()
+                }
                 token.category = t.category()
                 sentence.tokens.add(token)
                 section.tokens.add(token)

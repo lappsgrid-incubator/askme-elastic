@@ -17,6 +17,7 @@ class ElasticDocumentList {
 
     List<Document> doclist = new ArrayList<Document>();
     Stanford nlp;
+    Stanford nlp_simple;
 
 
     public ElasticDocumentList(String responsedata) {
@@ -44,7 +45,11 @@ class ElasticDocumentList {
 
     private Document createDocument(int i, Object hit) {
 
-        nlp = new Stanford();
+        //System.out.println('>>> nlp')
+        nlp = new Stanford('full');
+        //System.out.println('>>> nlp simple')
+        //nlp_simple = new Stanford('simple');
+        //System.out.println('>>> nlp done')
         Document doc = new Document();
         //System.out.println('\n>>> ' + i + ' ' + hit._id); }
 
@@ -52,16 +57,25 @@ class ElasticDocumentList {
         doc.id = hit._id;
         doc.nscore = hit._score;
 
+        int count = 0
+
         hit._source.each { k, v -> 
 
             //println "${k} ==> ${v}" }
+            count++;
         
             if (k == "id") {
                 doc.id = v;
 
             } else if (k == "abstract") {
                 String articleAbstract = new String(v);
-                doc.articleAbstract = nlp.process(articleAbstract);
+                //doc.articleAbstract = run_nlp(count, articleAbstract);
+                if (count < 20) {
+                    doc.articleAbstract = nlp.process(articleAbstract);
+                } else {
+                    doc.articleAbstract.text = articleAbstract;
+                    //doc.articleAbstract = nlp_simple.process(articleAbstract);
+                }
 
             } else if (k == "authKeywords") {
                 doc.authKeyWords = new String(v);
@@ -75,6 +89,12 @@ class ElasticDocumentList {
             } else if (k == "body" || k == "text") {
                 String body = new String(v);
                 doc.body = nlp.process(body);
+                if (count < 20) {
+                    doc.body = nlp.process(body);
+                } else {
+                    doc.body.text = body;
+                    //doc.body = nlp_simple.process(body);
+                }
                 doc.articleAbstract = doc.body;
 
             } else if (k == "contents_url") {
@@ -163,10 +183,16 @@ class ElasticDocumentList {
 
             } else if (k == "title") {
                 String title = new String(v);
-                doc.title = nlp.process(title);
+                if (count < 20) {
+                    doc.title = nlp.process(title);
+                } else {
+                    doc.title.text = title;
+                    //doc.title = nlp_simple.process(title);
+                }
+                //doc.title = nlp.process(title);
 
             } else if (k == "UserLicense") {
-                doc.UserLicense = new String(v);
+                doc.userLicense = new String(v);
 
             } else if (k == "url" || k == "URL") {
                 doc.url = new String(v);
