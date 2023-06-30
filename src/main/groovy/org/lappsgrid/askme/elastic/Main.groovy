@@ -21,14 +21,14 @@ import org.lappsgrid.rabbitmq.topic.PostOffice
 import org.lappsgrid.serialization.Serializer
 
 /**
- * Starts a thread that interacts with the post office, retrieves the message
- * from the RabbitMQ post office, determines the action that is required and
- * forwards the message that came in, but updates it, for example by adding
- * documents that resulted from a database query.
+ * Starts a thread that interacts with the RabbitMQ post office, retrieves the
+ * message, determines the action that is required and forwards the message that
+ * came in, but updates it by adding documents that resulted from the query.
  *
  * TODO:
- * 1) Update imports to phase out eager (waiting on askme-core pom)
- * 2) Add exceptions / case statements to recv method?
+ * - Add exceptions / case statements to recv method?
+ * - Figure out why logging does not work
+ *
  */
 @CompileStatic
 @Slf4j("logger")

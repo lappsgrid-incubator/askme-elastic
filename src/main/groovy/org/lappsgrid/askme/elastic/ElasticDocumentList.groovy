@@ -166,7 +166,7 @@ class ElasticDocumentList {
                 doc.title = nlp.process(title);
 
             } else if (k == "UserLicense") {
-                doc.UserLicense = new String(v);
+                doc.userLicense = new String(v);
 
             } else if (k == "url" || k == "URL") {
                 doc.url = new String(v);
