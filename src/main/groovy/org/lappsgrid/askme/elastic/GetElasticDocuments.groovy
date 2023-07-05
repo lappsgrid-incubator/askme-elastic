@@ -82,20 +82,34 @@ class GetElasticDocuments {
         Query query = packet.query
 
         logger.info("Sending query to Elastic: {}", query.query)
+        //System.out.println(">>> GetElasticDocuments.answer() - Sending query to Elastic: " + query.query)
         ElasticQueryResponse response = null;
         try {
+			System.out.println('>>> GetElasticDocuments.answer() - calling query()')
             response = this.query(packet.core, packet.query);
+			//System.out.println('>>> GetElasticDocuments.answer() - calling query() DONE')
         }
         catch (Exception e) {
             logger.info("An exception occured initializing QueryResponse");
+            System.out.println(">>> GetElasticDocuments.answer() - An exception occured initializing QueryResponse");
             packet.status = Status.ERROR
             packet.message = e.message
             packet.documents = []
             return packet
         }
-
-        System.out.println('>>> Building ElasticDocumentList')
+        if (response == null) {
+            logger.info("Got null response from database");
+            System.out.println(">>> GetElasticDocuments.answer() - Got null response from database");
+        	packet.status = Status.ERROR
+        	packet.message = "Got null response from database"
+	        packet.documents = []
+            return packet
+        }
+        System.out.println('>>> GetElasticDocuments.answer() - Building ElasticDocumentList')
+        System.out.println(response)
+        System.out.println(response.getResults())
         ElasticDocumentList documents = new ElasticDocumentList(response.getResults());
+        System.out.println('>>> GetElasticDocuments.answer() - Building ElasticDocumentList DONE')
 
         logger.info("Received {} documents", documents.size())
         packet.documents = documents.getDocs();
@@ -105,22 +119,27 @@ class GetElasticDocuments {
 
     ElasticQueryResponse query(String core, Query query) {
 
+    	System.out.println('>>> GetElasticDocuments.query() - initializing reponse to null')
         ElasticQueryResponse queryResponse = null;
 
         try {
+        	//System.out.println('>>> GetElasticDocuments.query() - creating httpClient')
             HttpClient httpClient = HttpClientBuilder.create().build();
+	    	//System.out.println('>>> GetElasticDocuments.query() - getting resuest')
             HttpPost getRequest = new HttpPost(this.elastic_address + core + "/_search");
 
             logger.info("GetElasticDocuments.query() elastic address:  " + this.elastic_address + core + "/_search");
-            System.out.println(">>> GetElasticDocuments.query() address : " + this.elastic_address + core + "/_search");
+            //System.out.println(">>> GetElasticDocuments.query() - address : " + this.elastic_address + core + "/_search");
             String queryline = new String(this.limitPrefix + query.count + "," + queryPrefix + "\"" + query.question + "\", " + this.fields + this.tiebreaker);
             StringEntity requestEntity = new StringEntity(queryline, ContentType.APPLICATION_JSON);
             logger.info("GetElasticDocuments.query() query:  " + queryline);
-            System.out.println(">>> GetElasticDocuments.query() query   : " + queryline);
+            //System.out.println(">>> GetElasticDocuments.query() - query   : " + queryline);
 
             getRequest.setEntity(requestEntity);
 
+            //System.out.println(">>> GetElasticDocuments.query() - executing request");
             HttpResponse response = httpClient.execute(getRequest);
+            //System.out.println(">>> GetElasticDocuments.query() - executing request DONE");
 
             BufferedReader br = new BufferedReader(
                     new InputStreamReader((response.getEntity().getContent())));
@@ -134,8 +153,8 @@ class GetElasticDocuments {
             br.close();
 
         } catch (IOException io) {
-
-            System.out.println("Exception:" + io.getStackTrace());
+            System.out.println(">>> GetElasticDocuments.query() - Exception:");
+            System.out.println(io.getStackTrace());
         }
 
 		logger.info("GetElasticDocuments.query(): returning response");

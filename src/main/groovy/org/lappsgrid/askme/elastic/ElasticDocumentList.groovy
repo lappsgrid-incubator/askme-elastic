@@ -32,7 +32,7 @@ class ElasticDocumentList {
         logger.info("ElasticDocumentList parseElasticResponse invoked");
 
         def slurped = new JsonSlurper().parseText(data);
-        System.out.println(">>> Read Elastic response");
+        //System.out.println(">>> Read Elastic response");
         for (int i = 0; i < slurped.hits.hits.size(); i++) {
             def hit = slurped.hits.hits[i];
             doc = createDocument(i, hit);
