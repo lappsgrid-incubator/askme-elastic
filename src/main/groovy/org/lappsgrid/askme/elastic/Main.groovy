@@ -21,13 +21,19 @@ import org.lappsgrid.rabbitmq.topic.PostOffice
 import org.lappsgrid.serialization.Serializer
 
 /**
+ * Starts a thread that interacts with the RabbitMQ post office, retrieves the
+ * message, determines the action that is required and forwards the message that
+ * came in, but updates it by adding documents that resulted from the query.
+ *
  * TODO:
- * 1) Update imports to phase out eager (waiting on askme-core pom)
- * 2) Add exceptions / case statements to recv method?
+ * - Add exceptions / case statements to recv method?
+ * - Figure out why logging does not work
+ *
  */
 @CompileStatic
 @Slf4j("logger")
-class Main{
+class Main {
+
     static final Configuration config = new Configuration()
 
     final PostOffice po
@@ -41,9 +47,9 @@ class Main{
     Timer timer
 
     Main() {
-        logger.info("Exchange: {}", config.EXCHANGE)
-        logger.info("Host: {}", config.HOST)
-        logger.info("Address: {}", config.ELASTIC_MBOX)
+        logger.info("Exchange : {}", config.EXCHANGE)
+        logger.info("Host     : {}", config.HOST)
+        logger.info("Address  : {}", config.ELASTIC_MBOX)
         try {
             po = new PostOffice(config.EXCHANGE, config.HOST)
             process = new GetElasticDocuments()
@@ -55,7 +61,6 @@ class Main{
     }
 
     void init() {
-
         new ClassLoaderMetrics().bindTo(registry)
         new JvmMemoryMetrics().bindTo(registry)
         new JvmGcMetrics().bindTo(registry)
@@ -67,21 +72,27 @@ class Main{
     }
 
     void run() {
+
         Object lock = new Object()
         logger.info("Running.")
+        
         box = new MailBox(config.EXCHANGE, config.ELASTIC_MBOX, config.HOST) {
+        
             @Override
             void recv(String s) {
+                System.out.println("Message string: " + s);
                 messagesReceived.increment()
                 AskmeMessage message = Serializer.parse(s, AskmeMessage)
                 String command = message.getCommand()
                 String id = message.getId()
+                printMessage('Message received', message)
+
                 if (command == 'EXIT' || command == 'STOP') {
                     logger.info('Received shutdown message, terminating Elastic service')
                     synchronized(lock) { lock.notify() }
                 }
                 else if(command == 'PING') {
-                    logger.info('Received PING message from and sending response back to {}', message.route[0])
+                    logger.info('Received PING and bouncing back response to {}', message.route[0])
                     Message response = new Message()
                     response.id = message.id
                     response.setCommand('PONG')
@@ -104,7 +115,6 @@ class Main{
                         else {
                             response.command("error")
                                 .set("message", "Unable to switch to core $core.")
-
                         }
                     }
                     else {
@@ -127,13 +137,12 @@ class Main{
                     Packet packet = (Packet) message.body
 					logger.info("Index being searched is '{}'", packet.core)
                     logger.info("Gathering elastic documents for query '{}'", packet.query.query)
-                    //message.body = timer.recordCallable {
-                    process.answer(packet, id) //, nDocuments)
-                    //command}
-                    logger.trace("Processed query from Message {}",id)
+                    process.answer(packet, id)
+                    logger.trace("Processed query from Message {}", id)
                     if (packet.documents && packet.documents.size() > 0) {
                         documentsFetched.increment(packet.documents.size())
                     }
+                    printMessage('Message sent', message)
                     Main.this.po.send(message)
                     logger.debug("Message {} with elastic documents sent to {}", id, destination)
                 }
@@ -144,6 +153,12 @@ class Main{
         box.close()
         logger.info("Elastic service terminated")
     }
+
+
+    static void printMessage(String header, AskmeMessage message) {
+        System.out.println(sprintf('>>> %s\n%s', header, message.toString()))
+    }
+
 
     static void main(String[] args) {
         logger.info("Starting Elastic service")

@@ -1,167 +1,199 @@
 package org.lappsgrid.askme.elastic;
 
 
-import java.text.NumberFormat;
 import groovy.util.logging.Slf4j;
+import groovy.json.JsonSlurper;
 import org.lappsgrid.askme.core.model.Document;
-import org.lappsgrid.askme.core.model.Section;
-import org.lappsgrid.askme.core.CSVParser;
 
 
+/**
+ * Takes the string that was returned from the database query, retrieves all hits
+ * from the parsed string, and for each hit create a Document instance. Pulls out
+ * _source properties for each hit and adds them to the Document, calling StanfordNLP
+ * on some of the fields.
+ */
 @Slf4j("logger")
 class ElasticDocumentList {
 
-    List<String> tv = new ArrayList<String>();
-    List<Object> fields = new ArrayList<Object>();
-    List<Document> doclist = new ArrayList<Document>(); ;
+    List<Document> doclist = new ArrayList<Document>();
     Stanford nlp;
 
 
     public ElasticDocumentList(String responsedata) {
 
-        this.parseDocument(responsedata);
+        this.parseElasticResponse(responsedata);
     }
 
 
-    private void parseDocument(String data) {
+    private void parseElasticResponse(String data) {
 
-        Document doc = new Document();
-        CSVParser parser = new CSVParser();
-        String delim = new String(":");
-        boolean firstDoc = true, firstID = true;
+        Document doc;
 
-        logger.info("ElasticDocumentList parseDocument invoked()");
-        //logger.info("ElasticDocumentList parseDocument data is: " + data);
+        logger.info("ElasticDocumentList parseElasticResponse invoked");
+
+        def slurped = new JsonSlurper().parseText(data);
+        //System.out.println(">>> Read Elastic response");
+        for (int i = 0; i < slurped.hits.hits.size(); i++) {
+            def hit = slurped.hits.hits[i];
+            doc = createDocument(i, hit);
+            printDocument(doc);
+            doclist.add(doc);
+        }
+    }
+
+
+    private Document createDocument(int i, Object hit) {
 
         nlp = new Stanford();
-        this.fields = parser.parseLine(data);
-        for (int i = 0; i < fields.size(); i++) {
+        Document doc = new Document();
+        //System.out.println('\n>>> ' + i + ' ' + hit._id); }
 
-            String field = (String) fields.get(i);
-            //System.out.println("parsed field> " + field);
+        // defaults that can be overruled by the properties in _source of the hit
+        doc.id = hit._id;
+        doc.nscore = hit._score;
 
-            //trim off leading underscore character
-            if (field.startsWith("_")) {
-                field = field.substring(1, field.length());
-            }
+        hit._source.each { k, v -> 
 
-            this.tv = field.split(delim, 2);
+            //println "${k} ==> ${v}" }
+        
+            if (k == "id") {
+                doc.id = v;
 
-            //populate document object with fields present
-            //keying on score field as beginning of new document
-            if (this.tv.get(0).equals("id")) {
-                if (firstID) {
-                    firstID = false;
-                } else {
-                    doc.id = this.tv.get(1);
-                    firstID = true;
-                }
-            } else if (this.tv.get(0).equals("abstract")) {
-                String articleAbstract = new String(this.tv.get(1));
+            } else if (k == "abstract") {
+                String articleAbstract = new String(v);
                 doc.articleAbstract = nlp.process(articleAbstract);
-            } else if (this.tv.get(0).equals("authKeywords")) {
-                doc.authKeyWords = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("authors")) {
-                doc.authors = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("body")) {
-                String body = new String(this.tv.get(1));
-                doc.body = nlp.process(body);
-                doc.articleAbstract = nlp.process(body);
-            } else if (this.tv.get(0).equals("text")) {
-                String body = new String(this.tv.get(1));
-                doc.body = nlp.process(body);
-                doc.articleAbstract = nlp.process(body);
-            } else if (this.tv.get(0).equals("contents_url")) {
-                doc.contents_url = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("contents")) {
-                doc.contents = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("coverDate")) {
-                doc.coverDate = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("doi")) {
-                doc.doi = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("eissn")) {
-                doc.eissn = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("endingPage")) {
-                doc.endingPage = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("fetched")) {
-                doc.fetched = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("file_urls")) {
-                doc.file_urls = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("filepath")) {
-                doc.filepath = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("issn")) {
-                doc.issn = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("issue")) {
-                doc.issue = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("metadata_update")) {
-                doc.metadata_update = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("online_pubdate")) {
-                doc.online_pubdate = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("openaccess")) {
-                doc.openaccess = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("path")) {
-                doc.path = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("pmid")) {
-                doc.pmid = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("pmc")) {
-                doc.pmc = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("preprint")) {
-                doc.preprint = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("priority")) {
-                doc.priority = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("publisher")) {
-                doc.publisher = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("pubname")) {
-                doc.pubname = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("sha1")) {
-                doc.sha1 = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("score")) {
-                String tmp = new String(this.tv.get(1));
-                String sScore = new String(tmp.substring(0, tmp.length() - 1));
 
-                NumberFormat nf = NumberFormat.getInstance();
-                if (firstDoc) {
-                    firstDoc = false;
-                    doc.nscore = nf.parse(sScore).floatValue();
-                } else {
-                    doclist.add(doc);
-                    doc = new Document();
-                    doc.nscore = nf.parse(sScore).floatValue();
-                }
-            } else if (this.tv.get(0).equals("source")) {
-                doc.source = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("startingPage")) {
-                doc.startingPage = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("tags")) {
-                doc.tags = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("time")) {
-                doc.time = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("title")) {
-                String title = new String(this.tv.get(1));
+            } else if (k == "authKeywords") {
+                doc.authKeyWords = new String(v);
+
+            } else if (k == "authors") {
+                doc.authors = new String(v);
+
+            // TODO: this seems wrong because it assumes that if there is a body then
+            // there is no abstract, but it could potentially overwrite an already added
+            // abstract.
+            } else if (k == "body" || k == "text") {
+                String body = new String(v);
+                doc.body = nlp.process(body);
+                doc.articleAbstract = doc.body;
+
+            } else if (k == "contents_url") {
+                doc.contents_url = new String(v);
+
+            } else if (k == "contents") {
+                doc.contents = new String(v);
+
+            } else if (k == "coverDate") {
+                doc.coverDate = new String(v);
+
+            } else if (k == "doi") {
+                doc.doi = new String(v);
+
+            } else if (k == "eissn") {
+                doc.eissn = new String(v);
+
+            } else if (k == "endingPage") {
+                doc.endingPage = new String(v);
+
+            } else if (k == "fetched") {
+                doc.fetched = new String(v);
+
+            } else if (k == "file_urls") {
+                doc.file_urls = new String(v);
+
+            } else if (k == "filepath") {
+                doc.filepath = new String(v);
+
+            } else if (k == "issn") {
+                doc.issn = new String(v);
+
+            } else if (k == "issue") {
+                doc.issue = new String(v);
+
+            } else if (k == "metadata_update") {
+                doc.metadata_update = new String(v);
+
+            } else if (k == "online_pubdate") {
+                doc.online_pubdate = new String(v);
+
+            } else if (k == "openaccess") {
+                doc.openaccess = new String(v);
+
+            } else if (k == "path") {
+                doc.path = new String(v);
+
+            } else if (k == "pmid") {
+                doc.pmid = new String(v);
+
+            } else if (k == "pmc") {
+                doc.pmc = new String(v);
+
+            } else if (k == "preprint") {
+                doc.preprint = new String(v);
+
+            } else if (k == "priority") {
+                doc.priority = new String(v);
+
+            } else if (k == "publisher") {
+                doc.publisher = new String(v);
+
+            } else if (k == "pubname") {
+                doc.pubname = new String(v);
+
+            } else if (k == "sha1") {
+                doc.sha1 = new String(v);
+
+            } else if (k == "score") {
+                // TODO: why is the last digit stripped from the score?
+                String tmp = new String(v);
+                String sScore = new String(tmp.substring(0, tmp.length() - 1));
+                doc.nscore = nf.parse(sScore).floatValue();
+
+            } else if (k == "source") {
+                doc.source = new String(v);
+
+            } else if (k == "startingPage") {
+                doc.startingPage = new String(v);
+
+            } else if (k == "tags") {
+                doc.tags = new String(v);
+
+            } else if (k == "time") {
+                doc.time = new String(v);
+
+            } else if (k == "title") {
+                String title = new String(v);
                 doc.title = nlp.process(title);
-            } else if (this.tv.get(0).equals("UserLicense")) {
-                doc.UserLicense = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("url") || this.tv.get(0).equals("URL")) {
-                doc.url = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("vol")) {
-                doc.publication_date = new String(this.tv.get(1));
-            } else if (this.tv.get(0).equals("year")) {
-                String year = new String(this.tv.get(1));
-                if (year.endsWith("}")) {
-                    year = year.substring(0, year.length() - 1);
-                }
+
+            } else if (k == "UserLicense") {
+                doc.userLicense = new String(v);
+
+            } else if (k == "url" || k == "URL") {
+                doc.url = new String(v);
+
+            } else if (k == "vol") {
+                doc.publication_date = new String(v);
+
+            } else if (k == "year") {
+                String year = new String(v);
                 doc.publication_date = year;
             }
-        }
+        };
 
-        //add last document
-        doclist.add(doc);
+        return doc;
+    }
+
+
+    // to be removed when the toString method is available on Document
+    private void printDocument(Document doc) {
+        println(sprintf("<Document %s score=%s url=%s>", doc.id, doc.nscore, doc.url));
     }
 
 
     public int size() {
         return (doclist.size());
     }
+
 
     public List<Document> getDocs() {
 

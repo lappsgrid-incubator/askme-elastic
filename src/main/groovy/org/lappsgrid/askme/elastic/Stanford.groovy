@@ -1,5 +1,6 @@
 package org.lappsgrid.askme.elastic
 
+import groovy.util.logging.Slf4j
 import edu.stanford.nlp.ling.CoreLabel
 import edu.stanford.nlp.pipeline.CoreDocument
 import edu.stanford.nlp.pipeline.CoreSentence
@@ -13,6 +14,7 @@ import org.lappsgrid.serialization.lif.Annotation
 /**
  *
  */
+@Slf4j("logger")
 class Stanford {
 
     StanfordCoreNLP pipeline;
@@ -25,7 +27,7 @@ class Stanford {
 
     Section process(String text) {
         Section section = new Section()
-		if(text!=null) {
+		if (text != null) {
         	section.text = new String(text);
 		}
 		else {
@@ -40,8 +42,7 @@ class Stanford {
             return section
         }
 
-        // Process the sentences.
-//        logger.trace("processing sentences")
+        // logger.trace("processing sentences")
         int id = 0;
         for (CoreSentence s : document.sentences()) {
             Pair<Integer,Integer> offsets = s.charOffsets();

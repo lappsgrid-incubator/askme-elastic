@@ -8,22 +8,24 @@
     <parent>
         <groupId>org.lappsgrid.maven</groupId>
         <artifactId>groovy-parent-pom</artifactId>
-        <version>1.1.2</version>
+        <version>1.1.3</version>
     </parent>
 
     <groupId>org.lappsgrid.askme</groupId>
     <artifactId>elastic</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 
     <name>AskMe Elastic</name>
     <description>Elastic document retrieval service.</description>
 
     <properties>
+        <lappsgrid.askme.core.version>2.3.0</lappsgrid.askme.core.version>
+        <lappsgrid.rabbitmq.version>1.2.0</lappsgrid.rabbitmq.version>
         <lapps.serialization.version>2.7.0</lapps.serialization.version>
     </properties>
 
     <build>
-        <finalName>${project.artifactId}-${project.version}-${git.commit.id.describe-short}</finalName>
+        <finalName>${project.artifactId}-${project.version}-${git.commit.id.describe}</finalName>
         <plugins>
              <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -118,7 +120,12 @@
         <dependency>
             <groupId>org.lappsgrid</groupId>
             <artifactId>rabbitmq</artifactId>
-            <version>1.2.0</version>
+            <version>${lappsgrid.rabbitmq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.lappsgrid.askme</groupId>
+            <artifactId>core</artifactId>
+            <version>${lappsgrid.askme.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.lappsgrid</groupId>
@@ -130,25 +137,26 @@
         	<artifactId>httpclient</artifactId>
         	<version>4.5.13</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.25</version>
-        </dependency>
+        </dependency> -->
         <dependency>
-            <groupId>org.lappsgrid.askme</groupId>
-            <artifactId>core</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <version>3.9.2</version>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-json</artifactId>
+            <version>3.0.9</version>
         </dependency>
         <dependency>
             <groupId>edu.stanford.nlp</groupId>
             <artifactId>stanford-corenlp</artifactId>
-            <version>3.9.2</version>
+            <version>4.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <version>4.4.0</version>
             <classifier>models</classifier>
         </dependency>
         <dependency>
