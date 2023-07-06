@@ -64,6 +64,8 @@ class GetElasticDocuments {
         Configuration config = new Configuration();
         this.elastic_host = config.ELASTICHOST;
         this.elastic_port = config.ELASTICPORT;
+        String elastic_user = "elastic";
+        String elastic_password = System.getenv("ELASTIC_PASSWORD");
         this.elastic_address = new String("http://" + elastic_host + ":" + elastic_port + "/")
     }
 
@@ -124,7 +126,16 @@ class GetElasticDocuments {
 
         try {
         	//System.out.println('>>> GetElasticDocuments.query() - creating httpClient')
-            HttpClient httpClient = HttpClientBuilder.create().build();
+            //HttpClient httpClient = HttpClientBuilder.create().build();
+            SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null,
+                TrustSelfSignedStrategy.INSTANCE).build();
+            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
+                sslContext, NoopHostnameVerifier.INSTANCE);
+            HttpClient httpClient = HttpClients.custom()
+                .setDefaultCookieStore(new BasicCookieStore())
+                .setSSLSocketFactory(sslSocketFactory)
+                .build();
+
 	    	//System.out.println('>>> GetElasticDocuments.query() - getting resuest')
             HttpPost getRequest = new HttpPost(this.elastic_address + core + "/_search");
 
