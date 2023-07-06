@@ -137,7 +137,11 @@ class Main {
                     Packet packet = (Packet) message.body
 					logger.info("Index being searched is '{}'", packet.core)
                     logger.info("Gathering elastic documents for query '{}'", packet.query.query)
+                    long startTime = System.nanoTime();
                     process.answer(packet, id)
+                    long endTime = System.nanoTime();
+                    long duration = (endTime - startTime);
+                    logger.info("time spent: {}", duration)
                     logger.trace("Processed query from Message {}", id)
                     if (packet.documents && packet.documents.size() > 0) {
                         documentsFetched.increment(packet.documents.size())
